@@ -2,7 +2,7 @@
 
 <br />
 <h2>Description</h2>
-This lab I analyzed logs in ELK to identify whether the alert generated was a false or true positive. I started by baselining and inventoring what logs, hosts, and connections were avaliable after specifying the correct time frame of the potential incident. Reversing the logs to show the older logs first to see the alerts and logs as they came in, I immediately found a suspicious powershell script/download that was mascarading as Invoice[.]pdf but the actual extension was [.]ps1, powershell script. Just after the script/process was run there were multiple reconnisannce techniques and network identifying tools used such as "whoami", "ipconfig", and "hostname", signifying the attacker was dinding inforamtion about the host. Next i came accross an Invoke-WebRequest that downloaded the program winPEAS that after some investigation was used to conduct privlege escaltion. The process was run and the attacker changed the registry key KEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer with AlwaysInstalledElevated. I researched what the attacker could do with that and found it allows .MSI (microsoft instalation files) to always be downloased with elevated privileged. Further down in the logs, the attacker downloaded a kmalicoiusly crafted .MSI file called adminshell[.]msi. Knowing that the attacker likely had elevated privileges, I then swtitched users to SYSTEM and discovered a new user "backdoor" was created and given adminstrative privileges for further persistance. I then pivoted back to the full log set and saw ey another Invote-WebRequest from the same malicious domain this time downloading beacon[.]bat, likely Command and Control also for persistance and for the attacker to communciate and potentionally exfiltrate data through. The attacker was thing found targeting payroll.servidaer.interanl first pby pinging it and then conducting a brute force attack with the user bsmith. The attacke gained successul authentication with the credentials bsmith:Password123! and downloaded bank-records, exfiltratqing the senstive data. 
+In this lab, the scenario was there was an alert of possible remtoe access and I was to investigate the logs in ELK. I began with baselining and inventorying the logs, hosts, and connections within the specified timeframe, I reversed the logs to see the events unfold in order. I first uncovered a suspicious PowerShell script masquerading as "Invoice.pdf" with the actual extension ".ps1". Following its execution, various reconnaissance techniques like "whoami", "ipconfig", and "hostname" were employed, indicating the attacker's information gathering. In the following logs, an Invoke-WebRequest downloaded "winPEAS." After researching what this program did I found that it is for privilege escalation. After it was run the attacker altered a registry key to permit elevated MSI downloads. A maliciously crafted "adminshell.msi" was then acquired. Recognizing elevated privileges, I switched to SYSTEM user, revealing the creation of a new user named "backdoor" with administrative privileges. Returning to full logs, another Invoke-WebRequest downloaded "beacon.bat" from the same malicious domain, possibly for Command and Control purposes. The attacker targeted "payroll.server.internal", conducting a successful brute force attack with credentials "bsmith:Password123!" and exfiltrating sensitive data.
 <h2>Utility Used</h2>
 
 - <b>Elastic Search/Kibana</b> 
@@ -24,25 +24,25 @@ Once connected to the ELK instance, the first thing to do would be to sort the l
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/78a6f92b-b986-4b46-aa7d-8e066298f234"  alt="ELK Log Analysis"/>
 <br />
 <br />
-Next thing I did was do some basic reconnaissance/baselining. Most the traffic is private except for the IP 84[.]237[.]252[.]156 so I took note of it. Alao, for a endpoint user in finance, the top processes being curl and powershell definetely raises redflags. <br/>
+Next thing I did was do some basic reconnaissance/baselining. Most the traffic is private except for the IP 84[.]237[.]252[.]156 so I took note of it. Also, for a endpoint user in finance, the top processes being curl and powershell definetely raises redflags. <br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/164f8629-0fcc-496e-821e-e066488c8076"  alt="ELK Log Analysis"/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/9b3c2257-75e2-4d42-a4f4-9f2b023847db"  alt="ELK Log Analysis"/>
 <br />
 <br />
-changed date old to newest to retrace the steps of the attacker and filtered with for results for process.command.line to see what commands were ued<br/>
+I then changed date old to newest to retrace the steps of the attacker and filtered with for results for process.command.line to see what commands were used and the first result confirmed the presence of an incdient.<br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/9e27d94d-7530-49b1-972f-c2b31ce3a006"  alt="ELK Log Analysis"/>
 <br />
 <br />
-It appears the client was tricked into downloading invoice[.]pdf but was unaware the actual file extenstion was [.]ps1 which is powershell script. In the following logs, commands were input likely by the attacker for reconnisance efforts such as whoami and ipconfig. These can be benign as an IT admin would be seen using these but given the suspected breach it is likely the threat actor<br/>
+It appears the client was tricked into downloading invoice[.]pdf but was unaware the actual file extenstion was [.]ps1 which is powershell script. In the following logs, commands were input likely by the attacker for reconnaissance efforts such as whoami and ipconfig. These can be benign as an IT admin would be seen using these but given the suspected breach it is likely the threat actor.<br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/cdf79fd7-5678-4585-8989-a8b4c4610a9c"  alt="ELK Log Analysis"/>
   <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/adcc4ec3-5ce3-475d-9342-ff89deccabf3"  alt="ELK Log Analysis"/>
 <br />
 <br />
-Suspicious, likely malicious downloaded using Powershells Invoke-WebRequest from the domain evilparrot[.]thm with the file winPEASany[.exe] renamed as winPEAS[.]exe<br/>
+Likely a malicious download using Powershell's Invoke-WebRequest from the domain evilparrot[.]thm with the file winPEASany[.exe] renamed as winPEAS[.]exe<br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/d857749a-feed-46be-b380-326dc6302b98"  alt="ELK Log Analysis"/>
 <br />
 <br />
-Conducting some research on the program winPEAS[.]exe I found a github page detailing that it is script for finding privliege escalation<br/>
+Conducting some research on the program winPEAS[.]exe I found a github page detailing that it is script for privliege escalation.<br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/3fe2884a-b20b-4a69-b2b6-03c974999acf"  alt="ELK Log Analysis"/>
 <br />
 <br />
@@ -67,12 +67,12 @@ Now that we know that attacker has elevated privliges I changed the user from bs
  <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/7f008403-d9bb-4976-968b-1ccc593bd3ae"  alt="ELK Log Analysis"/>
 <br />
 <br />
-After this I removed the user filter for SYSTEM so I could see both bsmith and SYSTEM logs incase the attacker continued the attack. Unfortuantely, I found another download request from the malicious domain, this being bat program <br/>
+After this I removed the user filter for SYSTEM so I could see both bsmith and SYSTEM logs incase the attacker continued the attack. Unfortuantely, I found another download request from the malicious domain, this being bat program. <br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/04d5a418-7d95-485d-844d-66109c9b217a"  alt="ELK Log Analysis"/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/ba3a5f88-1b14-49aa-b890-f7660036cbe5"  alt="ELK Log Analysis"/>
 <br />
 <br />
-The last form of persistance I found by the attack was once again making changes to the registry<br/>
+The last form of persistance I found by the attack was once again making changes to the registry.<br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/30fdc9bb-4bad-42f7-87d5-a56d451e6a6e"  alt="ELK Log Analysis"/>
 <br />
 <br />

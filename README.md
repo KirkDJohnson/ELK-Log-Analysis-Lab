@@ -2,8 +2,7 @@
 
 <br />
 <h2>Description</h2>
-This lab I analyzed a known malicious packet capture on the exploit Log4J. Due to the traffic in capture using http and not https (Hyper Text Transfer Protocol...[Secure] encrypts data after the TCP handshake making it unreadable unless in possession of the decryption key), I was able to identify the exploit in clear text. Once the attack was identified I checked to see if the server responsed to the attacker, i.e opened a command and control (c2) channel confirming whether or not the exploit was successful; which was fortunately not the case. Once it was clear the attack was unsuccessful I conducted threat intelligence/research to learn more about attack. My approach to this was to initally see who (what IP addresses and where they were from) was communicating with the target server. Then it was crucial to determine whether the server that was attacked (198.71.247.91) begun any new outbound connections.
-
+This lab I analyzed logs in ELK to identify whether the alert generated was a false or true positive. I started by baselining and inventoring what logs, hosts, and connections were avaliable after specifying the correct time frame of the potential incident. Reversing the logs to show the older logs first to see the alerts and logs as they came in, I immediately found a suspicious powershell script/download that was mascarading as Invoice[.]pdf but the actual extension was [.]ps1, powershell script. Just after the script/process was run there were multiple reconnisannce techniques and network identifying tools used such as "whoami", "ipconfig", and "hostname", signifying the attacker was dinding inforamtion about the host. Next i came accross an Invoke-WebRequest that downloaded the program winPEAS that after some investigation was used to conduct privlege escaltion. The process was run and the attacker changed the registry key KEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer with AlwaysInstalledElevated. I researched what the attacker could do with that and found it allows .MSI (microsoft instalation files) to always be downloased with elevated privileged. Further down in the logs, the attacker downloaded a kmalicoiusly crafted .MSI file called adminshell[.]msi. Knowing that the attacker likely had elevated privileges, I then swtitched users to SYSTEM and discovered a new user "backdoor" was created and given adminstrative privileges for further persistance. I then pivoted back to the full log set and saw ey another Invote-WebRequest from the same malicious domain this time downloading beacon[.]bat, likely Command and Control also for persistance and for the attacker to communciate and potentionally exfiltrate data through. The attacker was thing found targeting payroll.servidaer.interanl first pby pinging it and then conducting a brute force attack with the user bsmith. The attacke gained successul authentication with the credentials bsmith:Password123! and downloaded bank-records, exfiltratqing the senstive data. 
 <h2>Utility Used</h2>
 
 - <b>Elastic Search/Kibana</b> 
@@ -11,7 +10,7 @@ This lab I analyzed a known malicious packet capture on the exploit Log4J. Due t
 
 <h2>Environments Used </h2>
 
-- <b>Kali Linux through Oracle Virtual Box
+- <b>Windows 10
 
 <h2>Lab Overview:</h2>
 
@@ -68,18 +67,26 @@ Now that we know that attacker has elevated privliges I changed the user from bs
  <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/7f008403-d9bb-4976-968b-1ccc593bd3ae"  alt="ELK Log Analysis"/>
 <br />
 <br />
-  Text<br/>
-<img src=""  alt="ELK Log Analysis"/>
+After this I removed the user filter for SYSTEM so I could see both bsmith and SYSTEM logs incase the attacker continued the attack. Unfortuantely, I found another download request from the malicious domain, this being bat program <br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/04d5a418-7d95-485d-844d-66109c9b217a"  alt="ELK Log Analysis"/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/ba3a5f88-1b14-49aa-b890-f7660036cbe5"  alt="ELK Log Analysis"/>
 <br />
 <br />
-  Text<br/>
-<img src=""  alt="ELK Log Analysis"/>
+The last form of persistance I found by the attack was once again making changes to the registry<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/30fdc9bb-4bad-42f7-87d5-a56d451e6a6e"  alt="ELK Log Analysis"/>
 <br />
 <br />
-  Text<br/>
-<img src=""  alt="ELK Log Analysis"/>
+Towards the end of the logs the last at<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/2e47a686-191e-446c-9a74-30084aef7dbe"  alt="ELK Log Analysis"/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/3edffe22-9593-44b2-ab5e-da18718ce3f2"  alt="ELK Log Analysis"/>
 <br />
 <br />
+Latly, the attacker's brute force attack was successful with the credentials bsmith:Password123! and the<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/171b15d1-948d-41ea-ba9e-d6de95d44e16"  alt="ELK Log Analysis"/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/680b13ae-1f89-4f35-97ab-0da4f1c7f9a5"  alt="ELK Log Analysis"/>
+<br />
+<br />
+
 <h2>Thoughts</h2>
 Text
 <!--

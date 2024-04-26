@@ -16,6 +16,7 @@ This lab I analyzed a known malicious packet capture on the exploit Log4J. Due t
 <h2>Lab Overview:</h2>
 
 <p align="center">
+<h3>MIITRE ATT&CK: Discovery</h3>
 Scenerio/outline for the given lab <br/>
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/ec7d3086-dfa0-49b3-8ebc-b9225a302fe4"  alt="ELK Log Analysis"/>
 <br />
@@ -38,8 +39,33 @@ It appears the client was tricked into downloading invoice[.]pdf but was unaware
   <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/adcc4ec3-5ce3-475d-9342-ff89deccabf3"  alt="ELK Log Analysis"/>
 <br />
 <br />
-  Text<br/>
-<img src=""  alt="ELK Log Analysis"/>
+Suspicious, likely malicious downloaded using Powershells Invoke-WebRequest from the domain evilparrot[.]thm with the file winPEASany[.exe] renamed as winPEAS[.]exe<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/d857749a-feed-46be-b380-326dc6302b98"  alt="ELK Log Analysis"/>
+<br />
+<br />
+Conducting some research on the program winPEAS[.]exe I found a github page detailing that it is script for finding privliege escalation<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/3fe2884a-b20b-4a69-b2b6-03c974999acf"  alt="ELK Log Analysis"/>
+<br />
+<br />
+After the winPEAS[.]exe program was run, the attack changed a registry key "KEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\Installer" to AlwaysInstallElevated. <br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/b5bea594-2ccf-476f-8edc-6d812273be63"  alt="ELK Log Analysis"/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/008cebab-5db1-4578-b5a1-f8d50626dda2"  alt="ELK Log Analysis"/>
+<br />
+<br />
+  <h3>MIITRE ATT&CK: Privilege Escalation</h3>
+Now that it is clear that the attacker is moving to Privilege Escalation tactics with tactics such as winPEAS, I decided to also research was AlwaysInstalledElevated means and found:<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/af1bd4a2-7c83-4c9d-a7fb-1843bef3e020"  alt="ELK Log Analysis"/>
+<br />
+<br />
+With my new found knowledge that MSI will likely be leveraged by the attacker I changed the filter to only look for instances of MSI and found some hits. The attacker again used Invoke-WebRequest to download a program from the domain evilparrot[.]thm this program being adminshell[.]msi. (It was downloaded with elevated privileges as mentioned earlier from the "AlwaysInstallElevated" registry change.)<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/a5fdf66c-2479-4232-9499-3d706fb213a3"  alt="ELK Log Analysis"/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/039d3f6b-f5e3-4d17-ad58-130736c33531"  alt="ELK Log Analysis"/>
+<br />
+<br />
+  <h3>MIITRE ATT&CK: Persistence</h3>
+Now that we know that attacker has elevated privliges I changed the user from bsmith to SYSTEM to see if if any changes or attackers occured there. It was indeed the case, the attacker forged a new administrative user called backdoor, ensuring ongoing privileged entry to victim's computer, even if the initial infiltration method (Invoice.pdf.ps1) is detected and eradicated. <br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/13b16d8f-c67b-47d5-a5b6-8e3c15250b50"  alt="ELK Log Analysis"/>
+ <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/7f008403-d9bb-4976-968b-1ccc593bd3ae"  alt="ELK Log Analysis"/>
 <br />
 <br />
   Text<br/>
@@ -51,10 +77,6 @@ It appears the client was tricked into downloading invoice[.]pdf but was unaware
 <br />
 <br />
   Text<br/>
-<img src=""  alt="ELK Log Analysis"/>
-<br />
-<br />
-Text<br/>
 <img src=""  alt="ELK Log Analysis"/>
 <br />
 <br />

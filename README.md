@@ -33,8 +33,9 @@ changed date old to newest to retrace the steps of the attacker and filtered wit
 <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/9e27d94d-7530-49b1-972f-c2b31ce3a006"  alt="ELK Log Analysis"/>
 <br />
 <br />
-Powershell command was input and the next reconnisance efforts by the attacker appear to be happening, these can be benign as an IT admin would be seen using these but given the suspected breach it is likely the threat actor<br/>
-<img src=""  alt="ELK Log Analysis"/>
+It appears the client was tricked into downloading invoice[.]pdf but was unaware the actual file extenstion was [.]ps1 which is powershell script. In the following logs, commands were input likely by the attacker for reconnisance efforts such as whoami and ipconfig. These can be benign as an IT admin would be seen using these but given the suspected breach it is likely the threat actor<br/>
+<img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/cdf79fd7-5678-4585-8989-a8b4c4610a9c"  alt="ELK Log Analysis"/>
+  <img src="https://github.com/KirkDJohnson/ELK-Log-Analysis-Lab/assets/164972007/adcc4ec3-5ce3-475d-9342-ff89deccabf3"  alt="ELK Log Analysis"/>
 <br />
 <br />
   Text<br/>
